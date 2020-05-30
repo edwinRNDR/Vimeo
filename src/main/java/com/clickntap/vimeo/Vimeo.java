@@ -160,7 +160,7 @@ public class Vimeo {
 	
 	public String addVideo(InputStream inputStream) throws IOException, VimeoException {
 		Map<String, String> params = new HashMap<String, String>();
-		params.put("type", "streaming");
+		params.put("type", "upload.approach");
 		params.put("redirect_url", "");
 		VimeoResponse response = beginUploadVideo(params);
 		if (response.getStatusCode() == 201) {
