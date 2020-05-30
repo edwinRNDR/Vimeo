@@ -85,16 +85,21 @@ public class Vimeo {
 		return apiRequest(endpoint, HttpPatch.METHOD_NAME, params, null);
 	}
 
-	public VimeoResponse updateVideoMetadata(String videoEndpoint, String name, String description, String license, String privacyView, String privacyEmbed, boolean reviewLink) throws IOException {
+	public VimeoResponse updateVideoMetadata(String videoEndpoint, String name, String description, String license, String privacyView, String privacyEmbed, boolean privacyDownload) throws IOException {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("name", name);
 		params.put("description", description);
 		params.put("license", license);
 		params.put("privacy.view", privacyView);
 		params.put("privacy.embed", privacyEmbed);
-		params.put("review_link", reviewLink ? "true" : "false");
+		params.put("privacy.download", privacyDownload ? "true" : "false");
+		return updateVideoMetadata(videoEndpoint, params);
+	}
+
+	public VimeoResponse updateVideoMetadata(String videoEndpoint, Map<String, String> params) throws IOException {
 		return apiRequest(videoEndpoint, HttpPatch.METHOD_NAME, params, null);
 	}
+
 
 	public VimeoResponse addVideoPrivacyDomain(String videoEndpoint, String domain) throws ClientProtocolException, UnsupportedEncodingException, IOException {
 		return apiRequest(new StringBuffer(videoEndpoint).append("/privacy/domains/").append(URLEncoder.encode(domain, "UTF-8")).toString(), HttpPut.METHOD_NAME, null, null);
@@ -145,19 +150,18 @@ public class Vimeo {
 		return apiRequest(completeUri, HttpDelete.METHOD_NAME, null, null);
 	}
 
-	public String addVideo(File file, boolean upgradeTo1080) throws IOException, VimeoException {
-		return addVideo(new FileInputStream(file), upgradeTo1080);
+	public String addVideo(File file) throws IOException, VimeoException {
+		return addVideo(new FileInputStream(file));
 	}
 	
-	public String addVideo(byte[] bytes, boolean upgradeTo1080) throws IOException, VimeoException {
-		return addVideo(new ByteArrayInputStream(bytes), upgradeTo1080);
+	public String addVideo(byte[] bytes) throws IOException, VimeoException {
+		return addVideo(new ByteArrayInputStream(bytes));
 	}
 	
-	public String addVideo(InputStream inputStream, boolean upgradeTo1080) throws IOException, VimeoException {
+	public String addVideo(InputStream inputStream) throws IOException, VimeoException {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("type", "streaming");
 		params.put("redirect_url", "");
-		params.put("upgrade_to_1080", upgradeTo1080 ? "true" : "false");
 		VimeoResponse response = beginUploadVideo(params);
 		if (response.getStatusCode() == 201) {
 			uploadVideo(inputStream, response.getJson().getString("upload_link_secure"));
@@ -273,7 +277,7 @@ public class Vimeo {
 		} else if (methodName.equals(HttpPatch.METHOD_NAME)) {
 			request = new HttpPatch(url);
 		}
-		request.addHeader("Accept", "application/vnd.vimeo.*+json; version=3.2");
+		request.addHeader("Accept", "application/vnd.vimeo.*+json; version=3.4");
 		request.addHeader("Authorization", new StringBuffer(tokenType).append(" ").append(token).toString());
 		HttpEntity entity = null;
 		if (params != null) {
