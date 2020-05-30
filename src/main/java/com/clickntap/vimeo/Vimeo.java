@@ -105,6 +105,8 @@ public class Vimeo {
 		return apiRequest(new StringBuffer(videoEndpoint).append("/privacy/domains/").append(URLEncoder.encode(domain, "UTF-8")).toString(), HttpPut.METHOD_NAME, null, null);
 	}
 
+
+
 	public VimeoResponse getVideoPrivacyDomains(String videoEndpoint) throws IOException {
 		return apiRequest(new StringBuffer(videoEndpoint).append("/privacy/domains").toString(), HttpGet.METHOD_NAME, null, null);
 	}
@@ -247,7 +249,23 @@ public class Vimeo {
 	public VimeoResponse removeTextTrack(String videoEndPoint, String textTrackId) throws IOException {
 		return apiRequest(new StringBuffer(videoEndPoint).append("/texttracks/").append(textTrackId).toString(), HttpDelete.METHOD_NAME, null, null);
 	}
-	
+
+
+	public VimeoResponse addVideoThumbnail(String videoEndpoint, boolean active) throws ClientProtocolException, UnsupportedEncodingException, IOException {
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("active", active ? "true" : "false");
+		return apiRequest(new StringBuffer(videoEndpoint).append("/pictures").toString(), HttpPost.METHOD_NAME, null, null);
+	}
+
+	public VimeoResponse addVideoThumbnail(String videoEndpoint, boolean active, double time) throws ClientProtocolException, UnsupportedEncodingException, IOException {
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("active", active ? "true" : "false");
+		params.put("time", ""+time);
+		return apiRequest(new StringBuffer(videoEndpoint).append("/pictures").toString(), HttpPost.METHOD_NAME, null, null);
+	}
+
+
+
 	public URL getProxy() {
 		return proxy;
 	}
@@ -339,4 +357,7 @@ public class Vimeo {
 		client.close();
 		return vimeoResponse;
 	}
+
+
+
 }
