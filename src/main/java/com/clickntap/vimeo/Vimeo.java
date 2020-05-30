@@ -160,12 +160,11 @@ public class Vimeo {
 	
 	public String addVideo(InputStream inputStream) throws IOException, VimeoException {
 		Map<String, String> params = new HashMap<String, String>();
-		params.put("type", "upload.approach");
-		params.put("redirect_url", "");
+		params.put("upload.approach", "streaming");
 		VimeoResponse response = beginUploadVideo(params);
 		if (response.getStatusCode() == 201) {
-			uploadVideo(inputStream, response.getJson().getString("upload_link_secure"));
-			response = endUploadVideo(response.getJson().getString("complete_uri"));
+			uploadVideo(inputStream, response.getJson().getJSONObject("upload").getString("upload_link"));
+			response = endUploadVideo(response.getJson().getJSONObject("upload").getString("complete_uri"));
 			if (response.getStatusCode() == 201) {
 				return response.getJson().getString("Location");
 			}
@@ -277,7 +276,7 @@ public class Vimeo {
 		} else if (methodName.equals(HttpPatch.METHOD_NAME)) {
 			request = new HttpPatch(url);
 		}
-		request.addHeader("Accept", "application/vnd.vimeo.*+json; version=3.4");
+		request.addHeader("Accept", "application/vnd.vimeo.*+json;version=3.4");
 		request.addHeader("Authorization", new StringBuffer(tokenType).append(" ").append(token).toString());
 		HttpEntity entity = null;
 		if (params != null) {
