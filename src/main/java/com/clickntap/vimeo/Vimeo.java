@@ -149,6 +149,7 @@ public class Vimeo {
 	}
 
 	public VimeoResponse endUploadVideo(String completeUri) throws IOException {
+
 		return apiRequest(completeUri, HttpDelete.METHOD_NAME, null, null);
 	}
 
@@ -163,15 +164,22 @@ public class Vimeo {
 	public String addVideo(InputStream inputStream) throws IOException, VimeoException {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("upload.approach", "streaming");
-		VimeoResponse response = beginUploadVideo(params);
-		if (response.getStatusCode() == 201) {
-			uploadVideo(inputStream, response.getJson().getJSONObject("upload").getString("upload_link"));
-			response = endUploadVideo(response.getJson().getJSONObject("upload").getString("complete_uri"));
-			if (response.getStatusCode() == 201) {
-				return response.getJson().getString("Location");
+		VimeoResponse bresponse = beginUploadVideo(params);
+		if (bresponse.getStatusCode() == 201) {
+			VimeoResponse uresponse = uploadVideo(inputStream, bresponse.getJson().getJSONObject("upload").getString("upload_link"));
+			if (uresponse.getStatusCode() == 200) {
+				VimeoResponse eresponse = endUploadVideo(bresponse.getJson().getJSONObject("upload").getString("complete_uri"));
+				if (eresponse.getStatusCode() == 201) {
+					return eresponse.getJson().getString("Location");
+				} else {
+					throw new VimeoException(new StringBuffer("HTTP Status Code: ").append(eresponse.getStatusCode()).toString());
+				}
+			} else {
+				throw new VimeoException(new StringBuffer("HTTP Status Code: ").append(uresponse.getStatusCode()).toString());
 			}
+		} else {
+			throw new VimeoException(new StringBuffer("HTTP Status Code: ").append(bresponse.getStatusCode()).toString());
 		}
-		throw new VimeoException(new StringBuffer("HTTP Status Code: ").append(response.getStatusCode()).toString());
 	}
 
 	public VimeoResponse likesVideo(String videoId) throws IOException {
